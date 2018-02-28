@@ -92,8 +92,10 @@ function notLog(coin, price, growth, sentiment) {
     const time = new Date;
     console.log(Chalk.white('[' + time + '][' + Chalk.bold(coin) + '] ' + padding +' @ ' + Chalk.bgBlue(price + ' BTC') + ' | ' + Chalk.bgGreen(growth + '%') + ' | ' + Chalk.bgRed(sentiment + ' <3')));
     fs.appendFile(process.env.LOG_PATH, '[' + time + '][' + coin + '] ' + padding +' @ ' + price + ' | ' + growth + '% | ' + sentiment + ' <3' + '\n', err => {
-        errorLog(err);
-        throw err;
+        if (err) {
+            errorLog(err);
+            throw err;
+        }
     });
 }
 
@@ -101,8 +103,10 @@ function errorLog(err) {
     const errorLog = '[' + new Date + ']Error: ' + err;
     console.log(Chalk.red(errorLog));
     fs.appendFile(process.env.LOG_PATH, errorLog + '\n', err => {
-        errorLog(err);
-        throw err;
+        if (err) {
+            errorLog(err);
+            throw err;
+        }
     });
 }
 
@@ -125,8 +129,10 @@ function errorLog(err) {
 
         twitterStream = twitterClient.stream('statuses/filter', {track: watchlist})
         twitterStream.on('error', err => {
-            errorLog(err);
-            throw err;
+            if (err) {
+                errorLog(err);
+                throw err;
+            }
         });
         twitterStream.on('data', ev => {
             if (ev.extended_tweet) {
@@ -140,8 +146,10 @@ function errorLog(err) {
         const startingLog = '[' + new Date + ']Bot started...';
         console.log(Chalk.green(startingLog));
         fs.appendFile(process.env.LOG_PATH, startingLog + '\n', err => {
-            errorLog(err);
-            throw err;
+            if(err) {
+                errorLog(err);
+                throw err;
+            }
         });
 
         setTimeout(loop, 1000);
