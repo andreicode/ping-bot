@@ -91,13 +91,19 @@ function notLog(coin, price, growth, sentiment) {
 
     const time = new Date;
     console.log(Chalk.white('[' + time + '][' + Chalk.bold(coin) + '] ' + padding +' @ ' + Chalk.bgBlue(price + ' BTC') + ' | ' + Chalk.bgGreen(growth + '%') + ' | ' + Chalk.bgRed(sentiment + ' <3')));
-    fs.appendFile(process.env.LOG_PATH, '[' + time + '][' + coin + '] ' + padding +' @ ' + price + ' | ' + growth + '% | ' + sentiment + ' <3' + '\n');
+    fs.appendFile(process.env.LOG_PATH, '[' + time + '][' + coin + '] ' + padding +' @ ' + price + ' | ' + growth + '% | ' + sentiment + ' <3' + '\n', err => {
+        errorLog(err);
+        throw err;
+    });
 }
 
 function errorLog(err) {
     const errorLog = '[' + new Date + ']Error: ' + err;
     console.log(Chalk.red(errorLog));
-    fs.appendFile(process.env.LOG_PATH, errorLog + '\n');
+    fs.appendFile(process.env.LOG_PATH, errorLog + '\n', err => {
+        errorLog(err);
+        throw err;
+    });
 }
 
 (function init() {
@@ -133,7 +139,10 @@ function errorLog(err) {
 
         const startingLog = '[' + new Date + ']Bot started...';
         console.log(Chalk.green(startingLog));
-        fs.appendFile(process.env.LOG_PATH, startingLog + '\n');
+        fs.appendFile(process.env.LOG_PATH, startingLog + '\n', err => {
+            errorLog(err);
+            throw err;
+        });
 
         setTimeout(loop, 1000);
     });
