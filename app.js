@@ -8,6 +8,7 @@ const Twitter = require('twitter');
 const Sentiment = require('node-sentiment');
 const Chalk = require('chalk');
 const fs = require('fs');
+const request = require('request');
 
 binance.options({
     APIKEY: process.env.BINANCE_API_KEY,
@@ -30,6 +31,7 @@ const startTime = Date.now();
 
 const coins = [];
 let watchlist = 'BTC';
+let btcPrice = {};
 
 function getPrices() {
     return new Promise((resolve, reject) => binance.prices((error, ticker) => {
@@ -37,6 +39,14 @@ function getPrices() {
         resolve(ticker);
     }));
 }
+
+function getBTCPrice() {
+    request('https://api.coinmarketcap.com/v2/ticker/1/?structure=array', (err, resp, body) => {
+        btcPrice = JSON.parse(body).data[0];
+    });
+}
+
+setInterval(getBTCPrice, 60000);
 
 function loop() {
     getPrices().then(data => {
@@ -111,6 +121,7 @@ function errorLog(err) {
 }
 
 (function init() {
+    getBTCPrice();
     getPrices().then(data => {
         for (let x in data) {
             if (data.hasOwnProperty(x) && x.endsWith('BTC')) {
@@ -141,8 +152,9 @@ function errorLog(err) {
         });
 
         telegram.hears(/active/i, (ctx) => ctx.reply('I\'ve been active for ' + ((Date.now() - startTime) / 60000).toFixed(0) + ' minutes.'));
+        telegram.hears('/p', (ctx) => ctx.reply('BTC = ' + btcPrice.quotes.USD.price + "\n" + "24h: " + btcPrice.quotes.USD.percent_change_24h + "\n" + "1h: " + btcPrice.quotes.USD.percent_change_1h));
+        telegram.hears(/sendnudes/i, (ctx) => ctx.reply("https://www.catster.com/wp-content/uploads/2017/08/A-fluffy-cat-looking-funny-surprised-or-concerned.jpg"));
         telegram.startPolling()
-
         const startingLog = '[' + new Date + ']Bot started...';
         console.log(Chalk.green(startingLog));
         fs.appendFile(process.env.LOG_PATH, startingLog + '\n', err => {
